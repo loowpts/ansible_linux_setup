@@ -1,0 +1,59 @@
+- name: "Шаг 5: Kaspersky пропущен (skip_kav=true)"
+  ansible.builtin.debug:
+    msg: "Установка Kaspersky пропущена (skip_kav=true)"
+  when: skip_kav | bool
+
+- name: "Шаг 5: Создание временной папки"
+  ansible.builtin.file:
+    path: /tmp/kav_install
+    state: directory
+    mode: "0755"
+  when: not (skip_kav | bool)
+
+- name: "Шаг 5: Проверка наличия RPM Kaspersky"
+  ansible.builtin.stat:
+    path: /tmp/klnagent64.rpm
+  register: kav_rpm_stat
+  when: not (skip_kav | bool)
+
+- name: "Шаг 5: Загрузка агента Kaspersky"
+  ansible.builtin.shell: |
+    wget -q https://products.s.kaspersky-labs.com/endpoints/keslinux10/11.3.0.7441/multilanguage-11.3.0.7441/3635353135307c44454c7c31/klnagent64-14.0.0-4646.x86_64.rpm \
+    -O /tmp/klnagent64.rpm
+  when: not (skip_kav | bool) and not kav_rpm_stat.stat.exists
+  register: kav_download
+
+- name: "Шаг 5: Установка агента Kaspersky"
+  ansible.builtin.dnf:
+    name: "/tmp/klnagent64.rpm"
+    state: present
+    disable_gpg_check: true
+  become: true
+  when: not (skip_kav | bool) and kav_download is succeeded
+
+- name: "Шаг 5: Запись файла автоответов Kaspersky"
+  ansible.builtin.copy:
+    dest: /tmp/kav_answers
+    mode: "0600"
+    content: |
+      KLNAGENT_SERVER={{ ksn_server }}
+      KLNAGENT_PORT={{ ksn_port }}
+      KLNAGENT_SSLPORT={{ ksn_ssl_port }}
+      KLNAGENT_SSL={{ ksn_use_ssl }}
+      KLNAGENT_GATEWAY_MODE={{ ksn_gateway_mode }}
+      KLNAGENT_EULA_ACCEPTED=1
+  when: not (skip_kav | bool) and kav_download is succeeded
+
+- name: "Шаг 5: Настройка агента Kaspersky (postinstall)"
+  ansible.builtin.shell: |
+    KLAUTOANSWERS=/tmp/kav_answers \
+    /opt/kaspersky/klnagent64/lib/bin/setup/postinstall.pl
+  become: true
+  register: kav_postinstall
+  when: not (skip_kav | bool) and kav_download is succeeded
+
+- name: "Шаг 5: Удаление файла автоответов"
+  ansible.builtin.file:
+    path: /tmp/kav_answers
+    state: absent
+  when: not (skip_kav | bool)
