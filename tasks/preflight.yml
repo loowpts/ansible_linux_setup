@@ -1,0 +1,50 @@
+---
+# tasks/preflight.yml — предварительные проверки
+
+- name: Проверка — запуск от root (become)
+  ansible.builtin.command: whoami
+  become: true
+  register: whoami_result
+  changed_when: false
+
+- name: Проверка — ОС является РЕД ОС
+  ansible.builtin.shell: grep -qi "red os" /etc/os-release && echo "ok" || echo "warn"
+  register: os_check
+  changed_when: false
+
+- name: Предупреждение если не РЕД ОС
+  ansible.builtin.debug:
+    msg: "ВНИМАНИЕ: Не удалось подтвердить РЕД ОС — продолжаем на свой страх"
+  when: os_check.stdout == "warn"
+
+- name: Проверка — доступность сети
+  ansible.builtin.command: ping -c 1 -W 3 8.8.8.8
+  register: net_check
+  failed_when: false
+  changed_when: false
+
+- name: Предупреждение если сеть недоступна
+  ansible.builtin.debug:
+    msg: "ВНИМАНИЕ: Сеть недоступна — некоторые шаги могут упасть"
+  when: net_check.rc != 0
+
+- name: Проверка — dnf доступен
+  ansible.builtin.command: which dnf
+  changed_when: false
+
+- name: Установка expect (нужен для автоответов)
+  ansible.builtin.dnf:
+    name: expect
+    state: present
+  become: true
+
+- name: Вывод загруженных настроек
+  ansible.builtin.debug:
+    msg:
+      - "Имя ПК         : {{ pc_hostname }}"
+      - "Домен          : {{ domain_name | default('—') }}"
+      - "Польз. домена  : {{ dom_user | default('—') }}"
+      - "Сервер KSN     : {{ ksn_server | default('—') }}:{{ ksn_port | default('—') }}"
+      - "Пропустить RT  : {{ skip_rt }}"
+      - "Пропустить KAV : {{ skip_kav }}"
+      - "Пропустить домен: {{ skip_domain }}"
