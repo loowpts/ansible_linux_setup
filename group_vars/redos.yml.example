@@ -1,0 +1,17 @@
+# =============================================================================
+#  group_vars/redos.yml.example
+#
+#  Скопируй этот файл в group_vars/redos.yml и заполни своими значениями.
+#  Файл redos.yml добавлен в .gitignore и не попадёт в репозиторий.
+#
+#  Либо используй Ansible Vault для шифрования:
+#    ansible-vault create group_vars/redos.yml
+# =============================================================================
+
+# Пароль sudo пользователя admin на целевых машинах
+ansible_become_pass: "YOUR_ADMIN_PASSWORD"
+
+# Домен Windows / Samba
+domain_name: "your.domain.name"
+dom_user: "DomainUsername"
+dom_pass: "YOUR_DOMAIN_PASSWORD"

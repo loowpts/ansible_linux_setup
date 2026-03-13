@@ -1,0 +1,21 @@
+# =============================================================================
+#  host_vars/example.yml.example
+#
+#  Скопируй этот файл в host_vars/<IP_АДРЕС>.yml и заполни значениями
+#  для конкретной машины. Файлы host_vars/*.yml добавлены в .gitignore.
+# =============================================================================
+
+# Имя компьютера (hostname)
+pc_hostname: "PC001"
+
+# Kaspersky Network Agent — адрес сервера администрирования
+ksn_server: "192.168.X.X"
+ksn_port: "14000"
+ksn_ssl_port: "13000"
+ksn_use_ssl: "Y"        # Y или N
+ksn_gateway_mode: "1"   # 1 = включено
+
+# Что пропустить при настройке (true = пропустить)
+skip_rt: false       # RT-ядро
+skip_kav: false      # Kaspersky Network Agent
+skip_domain: false   # Ввод в домен
