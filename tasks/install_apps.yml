@@ -1,0 +1,38 @@
+- name: "Шаг 2: Установка Яндекс.Браузера (репозиторий)"
+  ansible.builtin.dnf:
+    name: yandex-browser-release
+    state: present
+  become: true
+  ignore_errors: true
+  register: yandex_release
+
+- name: "Шаг 2: Установка Яндекс.Браузера (пакет)"
+  ansible.builtin.dnf:
+    name: yandex-browser-stable
+    state: present
+  become: true
+  ignore_errors: true
+  when: yandex_release is succeeded
+
+- name: "Шаг 2: Установка libnsl"
+  ansible.builtin.dnf:
+    name: libnsl
+    state: present
+  become: true
+  ignore_errors: true
+
+- name: "Шаг 2: Установка Р7-Офис (репозиторий)"
+  ansible.builtin.dnf:
+    name: r7-release
+    state: present
+  become: true
+  ignore_errors: true
+  register: r7_release
+
+- name: "Шаг 2: Установка Р7-Офис (пакет)"
+  ansible.builtin.dnf:
+    name: r7-office
+    state: present
+  become: true
+  ignore_errors: true
+  when: r7_release is succeeded

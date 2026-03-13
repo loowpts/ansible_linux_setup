@@ -1,0 +1,14 @@
+---
+# tasks/install_plugins.yml — Шаг 3: pcsc-tools
+# Рутокен и КриптоПро устанавливаются вручную
+
+- name: "Шаг 3: Установка pcsc-tools"
+  ansible.builtin.dnf:
+    name: pcsc-tools
+    state: present
+  become: true
+  ignore_errors: true
+
+- name: "Шаг 3: Информация — Рутокен и КриптоПро"
+  ansible.builtin.debug:
+    msg: "Рутокен PKCS#11 и КриптоПро ЭЦП устанавливаются вручную на каждой машине."
