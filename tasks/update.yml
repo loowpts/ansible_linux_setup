@@ -1,0 +1,9 @@
+---
+# tasks/update.yml — Шаг 1: обновление системы
+
+- name: "Шаг 1: Обновление системы (dnf update + upgrade)"
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+    update_cache: true
+  become: true
