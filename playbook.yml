@@ -1,0 +1,37 @@
+---
+# playbook.yml — Подготовка рабочей станции РЕД ОС
+# Запуск: ansible-playbook playbook.yml
+
+- name: "Подготовка рабочей станции РЕД ОС"
+  hosts: redos
+  become: true
+
+  tasks:
+
+    - name: "=== Предварительные проверки ==="
+      ansible.builtin.import_tasks: tasks/preflight.yml
+
+    - name: "=== Шаг 1: Обновление системы ==="
+      ansible.builtin.import_tasks: tasks/update.yml
+
+    - name: "=== Шаг 2: Установка приложений ==="
+      ansible.builtin.import_tasks: tasks/install_apps.yml
+
+    - name: "=== Шаг 3: Плагины (Рутокен + КриптоПро) ==="
+      ansible.builtin.import_tasks: tasks/install_plugins.yml
+
+    - name: "=== Шаг 4: RT-ядро ==="
+      ansible.builtin.import_tasks: tasks/install_rt_kernel.yml
+
+    - name: "=== Шаг 5: Kaspersky Network Agent ==="
+      ansible.builtin.import_tasks: tasks/install_kaspersky.yml
+
+    - name: "=== Шаг 6: Ввод в домен ==="
+      ansible.builtin.import_tasks: tasks/join_domain.yml
+
+    - name: "=== Готово ==="
+      ansible.builtin.debug:
+        msg:
+          - "Настройка завершена для {{ inventory_hostname }}"
+          - "Имя ПК: {{ pc_hostname }}"
+          - "Рекомендуется перезагрузка."
