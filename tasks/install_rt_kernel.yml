@@ -1,0 +1,30 @@
+- name: "Шаг 4: RT-ядро пропущено (skip_rt=true)"
+  ansible.builtin.debug:
+    msg: "Установка RT-ядра пропущена (skip_rt=true)"
+  when: skip_rt | bool
+
+- name: "Шаг 4: Обновление перед установкой RT-ядра"
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  become: true
+  when: not (skip_rt | bool)
+
+- name: "Шаг 4: Установка репозитория RT-ядра"
+  ansible.builtin.dnf:
+    name: redos-kernel-rt-release
+    state: present
+  become: true
+  when: not (skip_rt | bool)
+
+- name: "Шаг 4: Установка kernel-rt"
+  ansible.builtin.dnf:
+    name: kernel-rt
+    state: present
+  become: true
+  when: not (skip_rt | bool)
+
+- name: "Шаг 4: Предупреждение о перезагрузке"
+  ansible.builtin.debug:
+    msg: "RT-ядро установлено. Требуется перезагрузка для активации."
+  when: not (skip_rt | bool)
