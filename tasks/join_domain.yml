@@ -1,0 +1,34 @@
+---
+- name: "Шаг 6: Ввод в домен пропущен (skip_domain=true)"
+  ansible.builtin.debug:
+    msg: "Ввод в домен пропущен (skip_domain=true)"
+  when: skip_domain | bool
+
+- name: "Шаг 6: Проверка наличия join-to-domain.sh"
+  ansible.builtin.command: which join-to-domain.sh
+  register: join_script_check
+  changed_when: false
+  failed_when: false
+  when: not (skip_domain | bool)
+
+- name: "Шаг 6: Ошибка — join-to-domain.sh не найден"
+  ansible.builtin.fail:
+    msg: "join-to-domain.sh не найден в PATH."
+  when: not (skip_domain | bool) and join_script_check.rc != 0
+
+- name: "Шаг 6: Ввод в домен"
+  ansible.builtin.command: >
+    join-to-domain.sh
+    -d {{ domain_name }}
+    -n {{ pc_hostname }}
+    -u {{ dom_user }}
+    -p {{ dom_pass }}
+    -y
+  become: true
+  register: join_result
+  when: not (skip_domain | bool) and join_script_check.rc == 0
+
+- name: "Шаг 6: Результат ввода в домен"
+  ansible.builtin.debug:
+    msg: "Компьютер {{ pc_hostname }} введён в домен {{ domain_name }}"
+  when: not (skip_domain | bool) and join_result is succeeded
